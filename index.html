@@ -3,212 +3,235 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Planificador de Materias</title>
+<title>Planificador de Materias - Carrera de Medicina</title>
+
 <style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #faf8f6;
-    color: #4a4a4a;
-    padding: 20px;
-  }
-  h1 {
-    text-align: center;
-    color: #7b5ea6;
-    margin-bottom: 25px;
-  }
-  h2 {
-    color: #a081c0;
-    margin-top: 40px;
-    border-bottom: 2px solid #d9c9e6;
-    padding-bottom: 5px;
-  }
-  .materia {
-    background: #f3e9f7;
-    border-radius: 10px;
-    margin: 8px auto;
-    padding: 12px 20px;
-    max-width: 600px;
-    box-shadow: 0 2px 6px rgba(180,150,220,0.3);
-    display: flex;
-    align-items: center;
-    transition: background 0.3s ease;
-  }
-  .materia.disabled {
-    background: #e8e1ed;
-    color: #999;
-  }
-  .materia input[type="checkbox"] {
-    margin-right: 18px;
-    transform: scale(1.3);
-    cursor: pointer;
-  }
-  .materia label {
-    flex-grow: 1;
-    font-size: 1.1rem;
-  }
-  .materia.disabled input[type="checkbox"] {
-    cursor: not-allowed;
-  }
+@font-face {
+  font-family: 'AppleGaramond';
+  src: url('./fonts/AppleGaramond.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: 'AppleGaramond', serif;
+  background: #faf8f6;
+  color: #4a4a4a;
+  padding: 20px;
+  margin: 0;
+}
+
+h1 {
+  font-style: italic;        /* cursiva */
+  color: #FF7480;             /* rosado */
+  text-align: center;
+  margin-bottom: 25px;
+  font-family: 'AppleGaramond', serif;
+}
+
+h2 {
+  color: #FF7480;             /* rosado */
+  margin-top: 40px;
+  border-bottom: 2px solid #FF7480;
+  padding-bottom: 5px;
+  font-family: 'AppleGaramond', serif;
+}
+
+.materia {
+  background: white;
+  border-radius: 10px;
+  margin: 8px auto;
+  padding: 12px 20px;
+  max-width: 600px;
+  box-shadow: 0 2px 6px rgba(180,150,220,0.2);
+  display: flex;
+  align-items: center;
+  transition: background 0.3s ease, color 0.3s ease;
+  color: #4a4a4a;
+}
+
+.materia.disabled {
+  background: #F3E275;        /* amarillo pastel inhabilitada */
+  color: #6b6300;
+}
+
+.materia input[type="checkbox"]:checked + label {
+  background: #84E3C8;        /* verde pastel aprobada */
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: #064936;
+  font-weight: 600;
+}
+
+.materia input[type="checkbox"] {
+  margin-right: 18px;
+  transform: scale(1.3);
+  cursor: pointer;
+}
+
+.materia.disabled input[type="checkbox"] {
+  cursor: not-allowed;
+}
+
+.materia label {
+  flex-grow: 1;
+  font-size: 1.1rem;
+  user-select: none;
+}
 </style>
 </head>
 <body>
 
-<h1>Planificador de Materias - Carrera de Medicina</h1>
+<h1>Plan de estudios Medicina 2023</h1>
 
 <div id="contenedor-materias"></div>
 
 <script>
-  // Lista de materias con correlativas
-  const materias = [
-    // 1º Año
-    { id: 'mod1', nombre: 'Módulo Morfológico Funcional I', correlativas: [] },
-    { id: 'mod2', nombre: 'Módulo Morfológico Funcional II', correlativas: ['mod1'] },
-    { id: 'raz1', nombre: 'Razonamiento Clínico I', correlativas: [] },
-    { id: 'med1', nombre: 'Medicina, Persona y Comunidad I', correlativas: [] },
-    { id: 'sal1', nombre: 'Salud Comunitaria I: Educación para la Salud', correlativas: [] },
-    { id: 'tal1', nombre: 'Talleres de Habilidades I', correlativas: [] },
-    { id: 'antfil', nombre: 'Antropología Filosófica', correlativas: [] },
+// Lista de materias con correlativas (id único y nombre)
+const materias = [
+  // 1º Año
+  { id: 'mod1', nombre: 'Módulo Morfológico Funcional I', correlativas: [] },
+  { id: 'mod2', nombre: 'Módulo Morfológico Funcional II', correlativas: ['mod1'] },
+  { id: 'raz1', nombre: 'Razonamiento Clínico I', correlativas: [] },
+  { id: 'med1', nombre: 'Medicina, Persona y Comunidad I', correlativas: [] },
+  { id: 'sal1', nombre: 'Salud Comunitaria I: Educación para la Salud', correlativas: [] },
+  { id: 'tal1', nombre: 'Talleres de Habilidades I', correlativas: [] },
+  { id: 'antfil', nombre: 'Antropología Filosófica', correlativas: [] },
 
-    // 2º Año
-    { id: 'mod3', nombre: 'Módulo Morfológico Funcional III', correlativas: ['mod2'] },
-    { id: 'mod4', nombre: 'Módulo Morfológico Funcional IV', correlativas: ['mod3'] },
-    { id: 'raz2', nombre: 'Razonamiento Clínico II', correlativas: ['raz1'] },
-    { id: 'med2', nombre: 'Medicina, Persona y Comunidad II', correlativas: [] },
-    { id: 'antteo', nombre: 'Antropología Teológica', correlativas: ['antfil'] },
-    { id: 'sal2', nombre: 'Salud Comunitaria II: Salud Familiar', correlativas: ['sal1'] },
-    { id: 'tal2', nombre: 'Taller de Habilidades II', correlativas: [] },
-    { id: 'com1', nombre: 'Comunicación Médica I', correlativas: [] },
-    { id: 'diag1', nombre: 'Diagnóstico por Imágenes I', correlativas: [] },
+  // 2º Año
+  { id: 'mod3', nombre: 'Módulo Morfológico Funcional III', correlativas: ['mod2'] },
+  { id: 'mod4', nombre: 'Módulo Morfológico Funcional IV', correlativas: ['mod3'] },
+  { id: 'raz2', nombre: 'Razonamiento Clínico II', correlativas: ['raz1'] },
+  { id: 'med2', nombre: 'Medicina, Persona y Comunidad II', correlativas: [] },
+  { id: 'antteo', nombre: 'Antropología Teológica', correlativas: ['antfil'] },
+  { id: 'sal2', nombre: 'Salud Comunitaria II: Salud Familiar', correlativas: ['sal1'] },
+  { id: 'tal2', nombre: 'Taller de Habilidades II', correlativas: [] },
+  { id: 'com1', nombre: 'Comunicación Médica I', correlativas: [] },
+  { id: 'diag1', nombre: 'Diagnóstico por Imágenes I', correlativas: [] },
 
-    // 3º Año
-    { id: 'modclin1', nombre: 'Módulo Clínico Fisiopatológico I', correlativas: [] },
-    { id: 'modclin2', nombre: 'Módulo Clínico Fisiopatológico II', correlativas: ['modclin1'] },
-    { id: 'raz3', nombre: 'Razonamiento Clínico III', correlativas: ['raz2'] },
-    { id: 'bioet', nombre: 'Bioética', correlativas: ['antteo'] },
-    { id: 'sal3', nombre: 'Salud Comunitaria III: Determinantes Sociales de la Salud', correlativas: ['sal2'] },
-    { id: 'com2', nombre: 'Comunicación Médica II', correlativas: ['com1'] },
-    { id: 'tal3', nombre: 'Taller de Habilidades III', correlativas: [] },
-    { id: 'diag2', nombre: 'Diagnóstico por Imágenes II', correlativas: ['diag1'] },
+  // 3º Año
+  { id: 'modclin1', nombre: 'Módulo Clínico Fisiopatológico I', correlativas: [] },
+  { id: 'modclin2', nombre: 'Módulo Clínico Fisiopatológico II', correlativas: ['modclin1'] },
+  { id: 'raz3', nombre: 'Razonamiento Clínico III', correlativas: ['raz2'] },
+  { id: 'bioet', nombre: 'Bioética', correlativas: ['antteo'] },
+  { id: 'sal3', nombre: 'Salud Comunitaria III: Determinantes Sociales de la Salud', correlativas: ['sal2'] },
+  { id: 'com2', nombre: 'Comunicación Médica II', correlativas: ['com1'] },
+  { id: 'tal3', nombre: 'Taller de Habilidades III', correlativas: [] },
+  { id: 'diag2', nombre: 'Diagnóstico por Imágenes II', correlativas: ['diag1'] },
 
-    // 4º Año
-    { id: 'modclinter1', nombre: 'Módulo Clínico Terapéutico I', correlativas: ['modclin1', 'modclin2'] },
-    { id: 'modquir1', nombre: 'Módulo Quirúrgico I', correlativas: [] },
-    { id: 'raz4', nombre: 'Razonamiento Clínico IV', correlativas: ['raz3'] },
-    { id: 'antmed', nombre: 'Antropología Médica', correlativas: ['bioet'] },
-    { id: 'sal4', nombre: 'Salud Comunitaria IV: APS en Niñez y Adolescencia', correlativas: ['sal3'] },
-    { id: 'com3', nombre: 'Comunicación Médica III', correlativas: ['com2'] },
-    { id: 'tal4', nombre: 'Taller de Habilidades IV', correlativas: [] },
-    { id: 'tal5', nombre: 'Taller de Habilidades V', correlativas: [] },
-    { id: 'talecg', nombre: 'Taller de ECG', correlativas: [] },
-    { id: 'procrea', nombre: 'Procreación Responsable. Consejería', correlativas: [] },
+  // 4º Año
+  { id: 'modclinter1', nombre: 'Módulo Clínico Terapéutico I', correlativas: ['modclin1', 'modclin2'] },
+  { id: 'modquir1', nombre: 'Módulo Quirúrgico I', correlativas: [] },
+  { id: 'raz4', nombre: 'Razonamiento Clínico IV', correlativas: ['raz3'] },
+  { id: 'antmed', nombre: 'Antropología Médica', correlativas: ['bioet'] },
+  { id: 'sal4', nombre: 'Salud Comunitaria IV: APS en Niñez y Adolescencia', correlativas: ['sal3'] },
+  { id: 'com3', nombre: 'Comunicación Médica III', correlativas: ['com2'] },
+  { id: 'tal4', nombre: 'Taller de Habilidades IV', correlativas: [] },
+  { id: 'tal5', nombre: 'Taller de Habilidades V', correlativas: [] },
+  { id: 'talecg', nombre: 'Taller de ECG', correlativas: [] },
+  { id: 'procrea', nombre: 'Procreación Responsable. Consejería', correlativas: [] },
 
-    // 5º Año
-    { id: 'modclinter2', nombre: 'Módulo Clínico Terapéutico II', correlativas: ['modclinter1'] },
-    { id: 'modquir2', nombre: 'Módulo Quirúrgico II', correlativas: ['modquir1'] },
-    { id: 'medsalud', nombre: 'Medicina de la Salud de la Mujer y la Niñez', correlativas: ['sal4', 'procrea'] },
-    { id: 'raz5', nombre: 'Razonamiento Clínico V', correlativas: ['raz4'] },
-    { id: 'med3', nombre: 'Medicina, Persona y Comunidad III', correlativas: [] },
-    { id: 'sal5', nombre: 'Salud comunitaria V: APS en Adultos Mayores', correlativas: [] },
-    { id: 'com4', nombre: 'Comunicación Médica IV', correlativas: ['com3'] },
-    { id: 'tal6', nombre: 'Taller de Habilidades VI', correlativas: ['tal4'] },
-    { id: 'tal7', nombre: 'Taller de Habilidades VII', correlativas: [] },
-    { id: 'asleg', nombre: 'Aspectos Legales de la Medicina', correlativas: [] },
+  // 5º Año
+  { id: 'modclinter2', nombre: 'Módulo Clínico Terapéutico II', correlativas: ['modclinter1'] },
+  { id: 'modquir2', nombre: 'Módulo Quirúrgico II', correlativas: ['modquir1'] },
+  { id: 'medsalud', nombre: 'Medicina de la Salud de la Mujer y la Niñez', correlativas: ['sal4', 'procrea'] },
+  { id: 'raz5', nombre: 'Razonamiento Clínico V', correlativas: ['raz4'] },
+  { id: 'med3', nombre: 'Medicina, Persona y Comunidad III', correlativas: [] },
+  { id: 'sal5', nombre: 'Salud comunitaria V: APS en Adultos Mayores', correlativas: [] },
+  { id: 'com4', nombre: 'Comunicación Médica IV', correlativas: ['com3'] },
+  { id: 'tal6', nombre: 'Taller de Habilidades VI', correlativas: ['tal4'] },
+  { id: 'tal7', nombre: 'Taller de Habilidades VII', correlativas: [] },
+  { id: 'asleg', nombre: 'Aspectos Legales de la Medicina', correlativas: [] },
 
-    // 6º Año
-    { id: 'talint', nombre: 'Taller de Integración', correlativas: [] }, // correlativa real es “todas aprobadas”, lo simplificamos
-    { id: 'pfoclin', nombre: 'PFO en Clínica Médica', correlativas: [] },
-    { id: 'pfocir', nombre: 'PFO en Cirugía', correlativas: [] },
-    { id: 'pfogin', nombre: 'PFO en Gineco-Obstetricia', correlativas: [] },
-    { id: 'pfopedi', nombre: 'PFO en Pediatría', correlativas: [] },
-    { id: 'pfoaps', nombre: 'PFO en APS', correlativas: [] },
-    { id: 'pfoopt', nombre: 'PFO Optativa', correlativas: [] },
-    { id: 'com5', nombre: 'Comunicación Médica V', correlativas: ['com4'] },
-  ];
+  // 6º Año
+  { id: 'talint', nombre: 'Taller de Integración', correlativas: [] }, 
+  { id: 'pfoclin', nombre: 'PFO en Clínica Médica', correlativas: [] },
+  { id: 'pfocir', nombre: 'PFO en Cirugía', correlativas: [] },
+  { id: 'pfogin', nombre: 'PFO en Gineco-Obstetricia', correlativas: [] },
+  { id: 'pfopedi', nombre: 'PFO en Pediatría', correlativas: [] },
+  { id: 'pfoaps', nombre: 'PFO en APS', correlativas: [] },
+  { id: 'pfoopt', nombre: 'PFO Optativa', correlativas: [] },
+  { id: 'com5', nombre: 'Comunicación Médica V', correlativas: ['com4'] },
+];
 
-  // Agrupamos materias por año para mostrar título
-  const materiasPorAno = {
-    '1º Año': ['mod1', 'mod2', 'raz1', 'med1', 'sal1', 'tal1', 'antfil'],
-    '2º Año': ['mod3', 'mod4', 'raz2', 'med2', 'antteo', 'sal2', 'tal2', 'com1', 'diag1'],
-    '3º Año': ['modclin1', 'modclin2', 'raz3', 'bioet', 'sal3', 'com2', 'tal3', 'diag2'],
-    '4º Año': ['modclinter1', 'modquir1', 'raz4', 'antmed', 'sal4', 'com3', 'tal4', 'tal5', 'talecg', 'procrea'],
-    '5º Año': ['modclinter2', 'modquir2', 'medsalud', 'raz5', 'med3', 'sal5', 'com4', 'tal6', 'tal7', 'asleg'],
-    '6º Año': ['talint', 'pfoclin', 'pfocir', 'pfogin', 'pfopedi', 'pfoaps', 'pfoopt', 'com5']
-  };
+// Agrupamos las materias por año para mostrar subtítulos
+const materiasPorAno = {
+  '1º Año': ['mod1', 'mod2', 'raz1', 'med1', 'sal1', 'tal1', 'antfil'],
+  '2º Año': ['mod3', 'mod4', 'raz2', 'med2', 'antteo', 'sal2', 'tal2', 'com1', 'diag1'],
+  '3º Año': ['modclin1', 'modclin2', 'raz3', 'bioet', 'sal3', 'com2', 'tal3', 'diag2'],
+  '4º Año': ['modclinter1', 'modquir1', 'raz4', 'antmed', 'sal4', 'com3', 'tal4', 'tal5', 'talecg', 'procrea'],
+  '5º Año': ['modclinter2', 'modquir2', 'medsalud', 'raz5', 'med3', 'sal5', 'com4', 'tal6', 'tal7', 'asleg'],
+  '6º Año': ['talint', 'pfoclin', 'pfocir', 'pfogin', 'pfopedi', 'pfoaps', 'pfoopt', 'com5']
+};
 
-  const contenedor = document.getElementById('contenedor-materias');
+const contenedor = document.getElementById('contenedor-materias');
 
-  // Función que crea el checkbox y etiqueta para cada materia
-  function crearMateria(materia) {
-    const div = document.createElement('div');
-    div.classList.add('materia');
+function crearMateria(materia) {
+  const div = document.createElement('div');
+  div.classList.add('materia');
 
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.id = materia.id;
-    checkbox.disabled = materia.correlativas.length > 0; // Si tiene correlativas, empieza deshabilitado
-    checkbox.title = 'Tildar si aprobaste esta materia';
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.id = materia.id;
 
-    const label = document.createElement('label');
-    label.htmlFor = materia.id;
-    label.textContent = materia.nombre;
+  const label = document.createElement('label');
+  label.htmlFor = materia.id;
+  label.textContent = materia.nombre;
 
-    div.appendChild(checkbox);
-    div.appendChild(label);
+  div.appendChild(checkbox);
+  div.appendChild(label);
 
-    if (checkbox.disabled) div.classList.add('disabled');
+  return { div, checkbox };
+}
 
-    return { div, checkbox, materia };
-  }
+const checkboxes = {};
 
-  // Renderizamos todas las materias
-  const checkboxes = {}; // Para guardar referencias a cada checkbox y materia
+// Creamos los bloques por año y las materias
+for (const ano in materiasPorAno) {
+  const h2 = document.createElement('h2');
+  h2.textContent = ano;
+  contenedor.appendChild(h2);
 
-  for (const ano in materiasPorAno) {
-    const h2 = document.createElement('h2');
-    h2.textContent = ano;
-    contenedor.appendChild(h2);
+  materiasPorAno[ano].forEach(id => {
+    const materia = materias.find(m => m.id === id);
+    if (!materia) return;
 
-    materiasPorAno[ano].forEach(id => {
-      const materia = materias.find(m => m.id === id);
-      if (!materia) return;
+    const { div, checkbox } = crearMateria(materia);
+    contenedor.appendChild(div);
 
-      const { div, checkbox } = crearMateria(materia);
-      contenedor.appendChild(div);
+    checkboxes[materia.id] = { checkbox, correlativas: materia.correlativas };
+  });
+}
 
-      checkboxes[materia.id] = { checkbox, correlativas: materia.correlativas };
-    });
-  }
-
-  // Función para actualizar habilitación según correlativas
-  function actualizarEstado() {
-    for (const id in checkboxes) {
-      const { checkbox, correlativas } = checkboxes[id];
-      if (correlativas.length === 0) {
-        // Si no tiene correlativas, siempre habilitado
-        checkbox.disabled = false;
-        checkbox.parentElement.classList.remove('disabled');
-      } else {
-        // Chequeamos si todas correlativas están tildadas
-        const todasAprobadas = correlativas.every(correlativaId => {
-          return checkboxes[correlativaId] && checkboxes[correlativaId].checkbox.checked;
-        });
-        checkbox.disabled = !todasAprobadas;
-        checkbox.parentElement.classList.toggle('disabled', !todasAprobadas);
-        if (!todasAprobadas) {
-          checkbox.checked = false;
-        }
+// Función para actualizar habilitación y estilos
+function actualizarEstado() {
+  for (const id in checkboxes) {
+    const { checkbox, correlativas } = checkboxes[id];
+    if (correlativas.length === 0) {
+      // Sin correlativas, habilitada
+      checkbox.disabled = false;
+      checkbox.parentElement.classList.remove('disabled');
+    } else {
+      // Habilitar sólo si todas las correlativas están aprobadas (checkbox tildados)
+      const todasAprobadas = correlativas.every(correlativaId => {
+        return checkboxes[correlativaId] && checkboxes[correlativaId].checkbox.checked;
+      });
+      checkbox.disabled = !todasAprobadas;
+      checkbox.parentElement.classList.toggle('disabled', !todasAprobadas);
+      if (!todasAprobadas) {
+        checkbox.checked = false;
       }
     }
   }
+}
 
-  // Escuchar cambios en todos los checkboxes para actualizar estados
-  for (const id in checkboxes) {
-    checkboxes[id].checkbox.addEventListener('change', actualizarEstado);
-  }
+// Actualizamos cada vez que se cambia un checkbox
+for (const id in checkboxes) {
+  checkboxes[id].checkbox.addEventListener('change', actualizarEstado);
+}
 
-  // Inicializamos estados
-  actualizarEstado();
-
+// Estado inicial
+actualizarEstado();
 </script>
 
 </body>
